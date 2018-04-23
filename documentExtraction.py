@@ -14,6 +14,7 @@ from nltk.tag import pos_tag
 from bs4 import BeautifulSoup as bs
 from nltk.tokenize import word_tokenize
 from many_stop_words import get_stop_words
+
 foldernamelist = []
 foldernamelistNew = []
 foldernamelistTitle = []
@@ -178,7 +179,14 @@ for jj in foldernamelistTitle:
     print("=============",count,"Folder Ends==============")
     #break
 # ======== End of ALL Folder ==========
-    
+
+
+'''
+////////// Extracting Feature 3 \\\\\\\\\\\
+f3 = length of document − sentence position+1/length of document
+
+'''
+  
 
 Feature3List = []
 ef = 0
@@ -200,6 +208,39 @@ for out in foldernamelist:
     print('=============End of Folder==============',ef)
     Feature3List.append(newfeatlist)
     #break
+print("============  End of Feature-3  ============")
+"""
+////////// Extracting Feature 4 \\\\\\\\\\\
+f4 = number of numerical data in the sentence/length of sentence
+
+""" 
+
+
+Feature4List = []
+ef4 = 0
+for f4out in foldernamelistNew:
+    f4featlist1 = []
+    c4 = 0
+    for f4inn in f4out:
+        f4featlist = []
+        for f4inner in f4inn:
+            s44 = ''.join(w4 for w4 in f4inner)
+            numdata = re.findall('\d+',s44)
+            feature4 = len(numdata) / float(len(f4inner))
+            f4featlist.append(feature4)
+            #break
+
+        c4+=1
+        print('End of File',c4)
+        f4featlist1.append(f4featlist)
+        #break
+    ef4+=1
+    print('=============End of Folder==============',ef4)
+    Feature4List.append(f4featlist1)
+    #break
+
+print("============  End of Feature-4  ============")
+
 """
 ////////// COMBINING FEATURES TO SINGLE LIST \\\\\\\\\\\
 
@@ -239,6 +280,8 @@ for f6out in foldernamelist:
     print('=============End of Folder==============',ef6)
     Feature6List.append(f6featlist1)
     #break
+
+print("============  End of Feature-6  ============")
     
 """
 ////////// Extracting Feature 7 \\\\\\\\\\\
@@ -263,13 +306,48 @@ for f7out in foldernamelistNew:
             #print(feature7)
             f7featlist.append(feature7)
             #break
-        c7+=1
+        #c7+=1
         #print('End of File',c7)
         f7featlist1.append(f7featlist)
         #break
-    ef7+=1
-    print('=============End of Folder==============',ef7)
+    #ef7+=1
+    #print('=============End of Folder==============',ef7)
     Feature7List.append(f7featlist1)
     #break
 
-    
+print("============  End of Feature-7  ============")
+"""
+////////// Extracting Feature 8 \\\\\\\\\\\
+f8 = number of nouns&Verbs in a sentence/length of sentence
+
+"""  
+
+
+Feature8List = []
+ef8 = 0
+for f8out in foldernamelistNew:
+    f8featlist1 = []
+    c8 = 0
+    for f8inn in f8out:
+        f8featlist = []
+        for f8inner in f8inn:
+            tagged_sent8 = pos_tag(f8inner)
+            #print(tagged_sent8)
+            propernouns8 = [word8 for word8,pos8 in tagged_sent8 if (pos8 == 'NNS' or pos8 == 'NN' or
+                                                                     pos8 == 'VBD' or pos8 == 'VBN' or
+                                                                     pos8 == 'VBP')]
+            #print('Length of PPN: ',len(propernouns))
+            #print('Length of Sentence: ',len(f7inner))
+            feature8 = len(propernouns8) / float(len(f8inner))
+            #print(feature7)
+            f8featlist.append(feature8)
+
+        #c8+=1
+        #print('End of File',c7)
+        f8featlist1.append(f8featlist)
+        #break
+    #ef8+=1
+    #print('=============End of Folder==============',ef8)
+    Feature8List.append(f8featlist1)
+    #break
+print("============  End of Feature-8  ============")   
