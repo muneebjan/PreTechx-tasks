@@ -18,6 +18,7 @@ from many_stop_words import get_stop_words
 foldernamelist = []
 foldernamelistNew = []
 foldernamelistTitle = []
+ListOfStagsPerFolder = []
 
 Stemmer = PorterStemmer()
 
@@ -57,8 +58,9 @@ for i in glob.glob("C:/Users/aa/.spyder/dataset/docs.with.sentence.breaks/*"):
     filenamelist1 = []
     filenamelist2 = []
     filenamelisttitle = []
+    ListOfStagsPerFile = []
     for j in glob.glob(i+"/*"):
-        
+        ListOfStagsIn_a_File = []
         list1 = []
         list2 = []
         titletagslines1 = []
@@ -95,6 +97,7 @@ for i in glob.glob("C:/Users/aa/.spyder/dataset/docs.with.sentence.breaks/*"):
             soup2 = bs(st, "html.parser")
             Stag = "".join(str(soup2.text))
             Stags = re.sub(r'[\\.]' , '', Stag)
+            ListOfStagsIn_a_File.append(Stags)
             StagsWT = word_tokenize(Stags)  #tokenizing
             for words in StagsWT:               #stopwords removing
                 if words not in totalstopwords: #stopwords removing
@@ -115,10 +118,13 @@ for i in glob.glob("C:/Users/aa/.spyder/dataset/docs.with.sentence.breaks/*"):
             #break
         #break
     #break
-
+    
+        ListOfStagsPerFile.append(ListOfStagsIn_a_File)
         filenamelist1.append(list1)
         filenamelist2.append(list2)
         filenamelisttitle.append(titletagslines1)
+    
+    ListOfStagsPerFolder.append(ListOfStagsPerFile)    
     foldernamelist.append(filenamelist1)
     foldernamelistNew.append(filenamelist2)
     foldernamelistTitle.append(filenamelisttitle)
@@ -187,7 +193,6 @@ f3 = length of document − sentence position+1/length of document
 
 '''
   
-
 Feature3List = []
 ef = 0
 for out in foldernamelist:
@@ -282,6 +287,7 @@ for f6out in foldernamelist:
     #break
 
 print("============  End of Feature-6  ============")
+
     
 """
 ////////// Extracting Feature 7 \\\\\\\\\\\
@@ -351,3 +357,44 @@ for f8out in foldernamelistNew:
     Feature8List.append(f8featlist1)
     #break
 print("============  End of Feature-8  ============")   
+
+
+"""
+////////// Extracting Feature 5 \\\\\\\\\\\
+f5 = number of words occuring in the sentence/number of words occuring in the longest sentence
+
+"""  
+    
+#from dateutil.parser import parse
+
+import datefinder
+datet = "The National Hurricane Center in Miami reported its position at 2 am Sunday at latitude  north,longitude  west, about  miles south of Ponce, Puerto Rico, and  miles southeast of Santo Domingo"
+Feature5List = []
+ef5 = 0
+for f5out in ListOfStagsPerFolder:
+    f5featlist1 = []
+    c5 = 0
+    for f5inn in f5out:
+        f5featlist = []
+        for f5inner in f5inn:
+            input_string = "monkey 2010-07-10 love banana"
+            # a generator will be returned by the datefinder module. I'm typecasting it to a list. Please read the note of caution provided at the bottom.
+            matches = list(datefinder.find_dates(input_string))
+            
+            if len(matches) > 0:
+                # date returned will be a datetime.datetime object. here we are only using the first match.
+                date = matches[0]
+                print date
+            else:
+                print 'No dates found'
+            break
+        c5+=1
+        print('End of File',c5)
+        f5featlist1.append(f5featlist)
+        break
+    ef5+=1
+    print('=============End of Folder==============',ef5)
+    Feature5List.append(f5featlist1)
+    break
+
+print("============  End of Feature-5  ============")
