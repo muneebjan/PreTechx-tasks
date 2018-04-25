@@ -367,9 +367,10 @@ f5 = number of words occuring in the sentence/number of words occuring in the lo
     
 #from dateutil.parser import parse
 
-import datefinder
-datet = "The National Hurricane Center in Miami reported its position at 2 am Sunday at latitude  north,longitude  west, about  miles south of Ponce, Puerto Rico, and  miles southeast of Santo Domingo"
+
 Feature5List = []
+timepattern = r"(?:\d{1,2}\s?[AaPp][Mm]) | (?:\d{1,2}\s?:\d{2}\s?[AaPp][Mm])" 
+datepattern = r"((?:1\d{3}|20\d{2})|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s?\d{1,2} | (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s?\d{1,2},?\s?1\d{3}|20\d{2})" 
 ef5 = 0
 for f5out in ListOfStagsPerFolder:
     f5featlist1 = []
@@ -377,24 +378,24 @@ for f5out in ListOfStagsPerFolder:
     for f5inn in f5out:
         f5featlist = []
         for f5inner in f5inn:
-            input_string = "monkey 2010-07-10 love banana"
-            # a generator will be returned by the datefinder module. I'm typecasting it to a list. Please read the note of caution provided at the bottom.
-            matches = list(datefinder.find_dates(input_string))
-            
-            if len(matches) > 0:
-                # date returned will be a datetime.datetime object. here we are only using the first match.
-                date = matches[0]
-                print date
-            else:
-                print 'No dates found'
-            break
+            teststr = "its Feb 3, 1994 and 1995 and Mar 3 here in morning"
+            matcher = re.findall(timepattern, f5inner)
+            matcher1 = re.findall(datepattern, f5inner)
+            matcher2 = matcher+matcher1
+            print(len(matcher2))
+            print(len(foldernamelistNew[ListOfStagsPerFolder.index(f5out)][f5out.index(f5inn)][f5inn.index(f5inner)]))
+            f5featlist.append(matcher2)
+            #break
         c5+=1
         print('End of File',c5)
         f5featlist1.append(f5featlist)
-        break
+        #break
     ef5+=1
     print('=============End of Folder==============',ef5)
     Feature5List.append(f5featlist1)
-    break
+    #break
 
 print("============  End of Feature-5  ============")
+
+
+
