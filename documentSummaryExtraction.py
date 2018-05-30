@@ -18,24 +18,17 @@ Sumfilenamelist = []
 snow = nltk.stem.SnowballStemmer('english')
 mystopwords = ["'","\\n","', '","n't","'s","'",' ',',','.','"','""',"''",'``',':','?','I','%','+','!','(',')','-',';','The']
 stpw = list(get_stop_words('en'))
-
-totalstopwords = mystopwords + stpw
-
-     
-for i in glob.glob("C:/Users/aa/Downloads/duc2002extracts/*"):
-    
+totalstopwords = mystopwords + stpw    
+for i in glob.glob("C:/Users/aa/Downloads/duc2002extracts/*"):    
     Fullsumlist = []
     for j in glob.glob(i+"/400e"):
         list1 = []
         fileread = open(j, "r")
         listoffiles = fileread.readlines()
         Sumfilenamelist.append(listoffiles)
-        
-        
         for x in Sumfilenamelist:
             text = "".join(str(x))
         soup = bs(text, "html.parser")
-        
         for z in soup.find_all('s'):
             sumanotherlist = []
             st = "".join(str(z))
@@ -45,22 +38,14 @@ for i in glob.glob("C:/Users/aa/Downloads/duc2002extracts/*"):
             StagsWT = word_tokenize(Stags)   #tokenizing
             for words in StagsWT:             #stopwords removing
                 if words not in totalstopwords: #stopwords removing
-                    words2 = snow.stem(words)
-                
+                    words2 = snow.stem(words)        
                     sumanotherlist.append(words)
-                    
-                                            #stopwords removing
+                    #stopwords removing
             list1.append(sumanotherlist)
-            
         Fullsumlist.append(list1)
-
     Sumfoldernamelist.append(Fullsumlist)
-
 """
-
-
 Comparing the lines within the files.
-
 """
 allsent = []
 NewSumlist = []
@@ -71,22 +56,17 @@ totalsentences = []
 count = 0
 count1 = 0
 count2 = 0
-
 for cc in Sumfoldernamelist[0::2]:
         NewSumlist.append(cc)
 for cc in Sumfoldernamelist[1::2]:
         NewSumlist1.append(cc)
-
 for mm in NewSumlist:
     nonmatchedsummlist = []
     for stagsumm in NewSumlist[count][count1]:
         for stagsumm1 in NewSumlist1[count][count1]:
-            if stagsumm == stagsumm1:
-           
-                matchedsummlist.append(stagsumm)
-                
-            if not stagsumm == stagsumm1:
-            
+            if stagsumm == stagsumm1:           
+                matchedsummlist.append(stagsumm)                
+            if not stagsumm == stagsumm1:            
                 if not stagsumm in nonmatchedsummlist:
                     nonmatchedsummlist.append(stagsumm)
                 if not stagsumm1 in nonmatchedsummlist:

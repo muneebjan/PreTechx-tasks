@@ -15,8 +15,13 @@ from nltk.stem import PorterStemmer
 from nltk.tag import pos_tag
 from bs4 import BeautifulSoup as bs
 from nltk.tokenize import word_tokenize
-from many_stop_words import get_stop_words
+from nltk.corpus import stopwords
 from collections import Counter
+import numpy as np
+
+import SentSimilarity as ss
+
+
 
 foldernamelist = []
 foldernamelistNew = []
@@ -24,7 +29,13 @@ foldernamelistTitle = []
 ListOfStagsPerFolder = []
 
 Stemmer = PorterStemmer()
+mystopwords1 = ['/','',' ','&','#','*','A','--','$','\\','_',"'n","'",'\\n',"', '","n't","'s","'\\n",' ',',','.','"','""',"''",'``',':','?','I','%','+','!','(',')','-',';','The']
+stpw1 = list(stopwords.words('english'))
 
+totalstopwords1 = mystopwords1 + stpw1
+
+mychecklist = []
+mychecklist1 = []
 def TagExtractionFuction(String):
     string = String
     for alltagsExtr in soup.find_all(string):
@@ -32,19 +43,21 @@ def TagExtractionFuction(String):
             tt = "".join(str(alltagsExtr))
             soup2 = bs(tt, "html.parser")
             Ttag = "".join(str(soup2.text))
-            Ttags = re.sub(r'[\'\n]','', Ttag)
-            
+            mychecklist.append(Ttag)
+            Ttags = re.sub(r"[\n,']",'', Ttag)
+            mychecklist1.append(Ttags)
             TtagsWT = Ttags.split()   #tokenizing
             for Twords in TtagsWT:  
                 #Twords = Twords.strip()#stopwords removing
-                if Twords not in totalstopwords: #stopwords removing
-                    
-                    Twordss = re.sub(r'\\n', '',Twords)
-                    Twordss = Twordss.replace('\s', "")
-                    words2 = Stemmer.stem(Twordss)
+                if Twords not in totalstopwords1: #stopwords removing
+                    #print(Twords)
+                    Twordss = Stemmer.stem(Twords)
+                    Twordss1 = re.sub(r"[\n;:]",'',Twordss)
+                    #Twordss1 = re.sub(r"[\\n]",'',Twordss)
+                    words2 = Twordss1.replace('\\n', "")
+                    #words2 = Stemmer.stem(Twordss1)
                     
                     titletagslines.append(words2)
-
             titletagslines1.append(titletagslines)
 
 
@@ -52,7 +65,7 @@ def TagExtractionFuction(String):
 
 
 mystopwords = ['&','#','*','A','--','$','\\','_',"'n","'",'\\n',"', '","n't","'s","'\\n",' ',',','.','"','""',"''",'``',':','?','I','%','+','!','(',')','-',';','The']
-stpw = list(get_stop_words('en'))
+stpw = list(stopwords.words('english'))
 
 totalstopwords = mystopwords + stpw
 
@@ -80,13 +93,12 @@ for i in glob.glob("C:/Users/aa/.spyder/dataset/docs.with.sentence.breaks/*"):
         
         
         TagExtractionFuction('headline')
-        
+    
         TagExtractionFuction('head')
-        
+    
         TagExtractionFuction('hl')
-        
+    
         TagExtractionFuction('h3')
-        
         
 
         for y in soup.find_all('text'):
@@ -99,35 +111,43 @@ for i in glob.glob("C:/Users/aa/.spyder/dataset/docs.with.sentence.breaks/*"):
             st = "".join(str(z))
             soup2 = bs(st, "html.parser")
             Stag = "".join(str(soup2.text))
-            Stags = re.sub(r'[\\.]' , '', Stag)
-            ListOfStagsIn_a_File.append(Stags)
-            StagsWT = word_tokenize(Stags)  #tokenizing
-            for words in StagsWT:               #stopwords removing
-                if words not in totalstopwords: #stopwords removing
-                    words2 = Stemmer.stem(words)
-                    words3 = re.sub(r"[']" , '', words2)
-                    anotherlist.append(words3)   #stopwords removing
-            
-            if not len(anotherlist) == 0:
-                list1.append(anotherlist)
+            if Stag == ' . . .':
+                del Stag
+            elif Stag == ' I':
+              del Stag
+           
+            else:
+                Stags = re.sub(r'[\\.]' , '', Stag)
+                ListOfStagsIn_a_File.append(Stags)
+                StagsWT = word_tokenize(Stags)  #tokenizing
+                for words in StagsWT:               #stopwords removing
+                    if words not in totalstopwords: #stopwords removing
+                        words2 = Stemmer.stem(words)
+                        words3 = re.sub(r"[']" , '', words2)
+                        anotherlist.append(words3)   #stopwords removing
                 
-            for words1 in StagsWT:               #stopwords removing
-                if words1 not in totalstopwords: #stopwords removing
-                    words1 = re.sub(r"[,``'']" , '', words1)
-                    anotherlist1.append(words1)   #stopwords removing
-            
-            if not len(anotherlist1) == 0:
-                list2.append(anotherlist1)
+                if not len(anotherlist) == 0:
+                    list1.append(anotherlist)
+                    
+                for words1 in StagsWT:               #stopwords removing
+                    if words1 not in totalstopwords: #stopwords removing
+                        words1 = re.sub(r"[,``''-]" , '', words1)
+                        anotherlist1.append(words1)   #stopwords removing
+                
+                if not len(anotherlist1) == 0:
+                    list2.append(anotherlist1)
             #list1.append(Stags)
-            #break
-        #break
-    #break
+            #break                    #innerfurther break
+        #break                        #inner loop break
+    #break                            #outer loop break
     
         ListOfStagsPerFile.append(ListOfStagsIn_a_File)
         filenamelist1.append(list1)
         filenamelist2.append(list2)
         filenamelisttitle.append(titletagslines1)
-    
+        if len(titletagslines1) == 0:
+            titletagslines1.insert(filenamelisttitle.index(titletagslines1),"NAN")
+        
     ListOfStagsPerFolder.append(ListOfStagsPerFile)    
     foldernamelist.append(filenamelist1)
     foldernamelistNew.append(filenamelist2)
@@ -136,6 +156,7 @@ for i in glob.glob("C:/Users/aa/.spyder/dataset/docs.with.sentence.breaks/*"):
 #%%
 '''
 ////////////// First Feature Extraction \\\\\\\\\\\\\\\
+F1 = number of title words in sentence / number of words in document title
 '''
 #%%
 FeaturesList = []
@@ -171,17 +192,19 @@ for jj in foldernamelistTitle:
                 count2+=1
                 #print("End of Sentence Title: ",count2)
                 Feature = len(AtitleWlist)/float(totalTitleWords)
-                Feature = [Feature]
+                Feature = [float("{0:.3f}".format(round(Feature,3)))]
                 titleWlist1.append(Feature)
                 #break
             titleWlist2.append(titleWlist1)
             print('End of File: ',len(titleWlist2))
             perfilecounter+=1
             #break
-        indexx+=1            
-        if len(mm) == 0:
-            print('------------------------',indexx,'----------------------------')
-            mm.insert(indexx,"NAN")
+            
+        #indexx+=1            
+        #if len(mm) == 0:
+            #print('------------------------',indexx,'----------------------------')
+            #mm.insert(indexx,"NAN")
+            
         #break
     # ======== End of 1st Folder ==========   
     count+=1
@@ -192,7 +215,48 @@ for jj in foldernamelistTitle:
     #break
 # ======== End of ALL Folder ==========
 #%%
+"""
+////////// Extracting Feature 2 \\\\\\\\\\\
+f2 = Sentences Similarity
 
+""" 
+#%%
+
+Feature2List = []
+ef = 0
+coun = 0
+sumvalues = 0
+for out in ListOfStagsPerFolder:
+    newfeatlistf2 = []
+    ccc = 0
+    for inn in out:
+        featlist = []
+        f2featlist = []
+        for inner in inn:
+            
+            for perfilesent in ListOfStagsPerFolder[ef][ccc]:
+                if inner != perfilesent:
+                    totalvalues = ss.semanticSimilarity(inner, perfilesent)
+                    sumvalues = sumvalues + totalvalues  
+            featlist.append(sumvalues)
+            sumvalues = 0
+            
+            #break
+        ccc+=1
+        print('End of File',ccc)
+        newfeatlistf2.append(f2featlist)
+        break
+    ef+=1
+    print('=============End of Folder==============',ef)
+    Feature2List.append(newfeatlistf2)
+    break
+print("============  End of Feature-3  ============")
+
+
+
+
+
+#%%
 '''
 ////////// Extracting Feature 3 \\\\\\\\\\\
 f3 = length of document − sentence position+1/length of document
@@ -208,7 +272,7 @@ for out in foldernamelist:
         featlist = []
         for inner in inn:
             feature = (len(inn) - ((inn.index(inner))+1)) / float(len(inn))
-            feature = [feature]
+            feature = [float("{0:.3f}".format(round(feature,3)))]
             featlist.append(feature)
             #Feature1List[foldernamelist.index(out)][out.index(inn)][inn.index(inner)].append(feature)
             #break
@@ -242,7 +306,7 @@ for f4out in foldernamelistNew:
             s44 = ''.join(w4 for w4 in f4inner)
             numdata = re.findall('\d+',s44)
             feature4 = len(numdata) / float(len(f4inner))
-            feature4 = [feature4]
+            feature4 = [float("{0:.3f}".format(round(feature4,3)))]
             f4featlist.append(feature4)
             #break
 
@@ -266,55 +330,29 @@ print("============  End of Feature-4  ============")
 """ 
 #%%
 
-def populateFeaturesList(GivenList):
-  
-    for fold in GivenList:
+def populateFeaturesList(givenlist):
+
+    f5c1 = 0  
+    f5c2 = 0
+    f5c3 = 0
+    
+    for fold in givenlist:
         for fil in fold:
             for filinner in fil:
-                FeaturesList[GivenList.index(fold)][fold.index(fil)][fil.index(filinner)].extend(filinner)
+                #Feature6List[f5c1][f5c2][f5c3].append(filinner)
+                #print((f5c1,f5c2,f5c3),filinner)
+                #print((f5c1,f5c2,f5c3),Feature6List[f5c1][f5c2][f5c3])
+                FeaturesList[f5c1][f5c2][f5c3].extend(filinner)
+                f5c3+=1
                 #break
+            f5c3 = 0
+            f5c2+=1
             #break
+        f5c3 = 0
+        f5c2 = 0
+        f5c1+=1
         #break
-#%%
-  
-for fold in Feature3List:
-    for fil in fold:
-        for filinner in fil:
-            Feature4List[Feature3List.index(fold)][fold.index(fil)][fil.index(filinner)].extend(filinner)
-                #break
-            #break
-        #break
-
-#%%
-
-for checkin in Feature4List:
-    for checkinn in checkin:
-        for checkinner in checkinn:
-            print(Feature4List.index(checkin),checkin.index(checkinn),checkinn.index(checkinner),len(checkinner))
-            #break
-        #break
-    #break
-
-
-"""
-////////////////////////////////////////////////////////
-\\\\\\\\\\ STARTING TO POPULATE FEATURESLIST \\\\\\\\\\\
-////////////////////////////////////////////////////////
-""" 
-#%%
-
-populateFeaturesList(Feature3List)
-
-
-#%%
-
-"""
-////////////////////////////////////////////////////////
-\\\\\\\\\\\\ ENDING POPULATE FEATURESLIST \\\\\\\\\\\\\\
-////////////////////////////////////////////////////////
-""" 
-#%%
-
+        
 
 
 #%%
@@ -324,8 +362,6 @@ f5 = number of temporal information in the sentence/length of sentence
 
 """  
 #%%
-   
-#THIS FEATURE IS INCOMPLETE TILL NOW.
 
 
 Feature5List = []
@@ -347,11 +383,12 @@ for f5out in ListOfStagsPerFolder:
             matcher2 = matcher+matcher1
             #print(len(matcher2))
             #print(foldernamelistNew[f5c][f5c1][f5c2])
-            print(ListOfStagsPerFolder.index(f5out),f5out.index(f5inn),f5inn.index(f5inner))
-            print(len(foldernamelistNew[ListOfStagsPerFolder.index(f5out)][f5out.index(f5inn)][f5inn.index(f5inner)]))
-
+            #print(ListOfStagsPerFolder.index(f5out),f5out.index(f5inn),f5inn.index(f5inner))
+            #print(len(foldernamelistNew[ListOfStagsPerFolder.index(f5out)][f5out.index(f5inn)][f5inn.index(f5inner)]))
+            feature5 = len(matcher2) / float(len(foldernamelistNew[ListOfStagsPerFolder.index(f5out)][f5out.index(f5inn)][f5inn.index(f5inner)]))
+            feature5 = [float("{0:.3f}".format(round(feature5,3)))]
             f5c2+=1
-            f5featlist.append(matcher2)
+            f5featlist.append(feature5)
             #break
         f5c2= 0
         f5c1+=1
@@ -387,7 +424,7 @@ for f6out in foldernamelist:
         f6featlist = []
         for f6inner in f6inn:
             featuref6 = (len(f6inner)) / float(len(max(f6inn,key=len)))
-            featuref6 = [featuref6]
+            featuref6 = [float("{0:.3f}".format(round(featuref6,3)))]
             f6featlist.append(featuref6)
             #break
         c6+=1
@@ -423,7 +460,7 @@ for f7out in foldernamelistNew:
             #print('Length of PPN: ',len(propernouns))
             #print('Length of Sentence: ',len(f7inner))
             feature7 = len(propernouns) / float(len(f7inner))
-            feature7 = [feature7]
+            feature7 = [float("{0:.3f}".format(round(feature7,3)))]
             f7featlist.append(feature7)
             #break
         #c7+=1
@@ -463,7 +500,7 @@ for f8out in foldernamelistNew:
             #print('Length of PPN: ',len(propernouns))
             #print('Length of Sentence: ',len(f7inner))
             feature8 = len(propernouns8) / float(len(f8inner))
-            feature8 = [feature8]
+            feature8 = [float("{0:.3f}".format(round(feature8,3)))]
             f8featlist.append(feature8)
 
         #c8+=1
@@ -515,10 +552,8 @@ f9 = number of frequent terms in the sentence/max(number of frequent terms)
 c9count1 = 0
 c9count = 0  
 Feature9List = []
-ef9 = 0
 for f9out in foldernamelist:
     f9featlist1 = []
-    c9 = 0
     for f9inn in f9out:
         f9featlist = []
         for f9inner in f9inn:
@@ -538,18 +573,91 @@ for f9out in foldernamelist:
             #print(len(AChecklist))
             #print(len(top10perfile))
             feature9 = len(AChecklist) / float(len(wordsintop10out))
-            feature9 = [feature9]
+            feature9 = [float("{0:.3f}".format(round(feature9,3)))]
             f9featlist.append(feature9)
             #break
-        c9+=1
-        print('End of File',c9)
         f9featlist1.append(f9featlist)
         #break
-    ef9+=1
-    print('=============End of Folder==============',ef9)
     Feature9List.append(f9featlist1)
     #break
-
-print("============  End of Feature-9  ============")
 #%%
+"""
+////////////////////////////////////////////////////////
+\\\\\\\\\\ CALLING FUNCTION TO POPULATE \\\\\\\\\\\
+////////////////////////////////////////////////////////
+""" 
+#%%
+
+populateFeaturesList(Feature3List)
+populateFeaturesList(Feature4List)
+populateFeaturesList(Feature5List)
+populateFeaturesList(Feature6List)
+populateFeaturesList(Feature7List)
+populateFeaturesList(Feature8List)
+populateFeaturesList(Feature9List)
+
+
+
+#%%
+"""
+////////////////////////////////////////////////////////
+\\\\\\\\\\ ENDING OF THE FUNCTION POPULATE \\\\\\\\\\\
+////////////////////////////////////////////////////////
+""" 
+
+#%%
+
+#=======================================================
+#======== Single List Containing All Features ==========
+#=======================================================
+
+SingleListContainingFeatures = []
+
+for outersl in FeaturesList:
+    for innsl in outersl:
+        for innersl in innsl:
+            SingleListContainingFeatures.append(innersl)
+
+#=========================END===========================
+#======== Single List Containing All Features ==========
+#=========================END===========================
+            
+            
+#%%
+            
+            
+#=======================================================
+#======= POPULATING NUMPY ARRAY WITH FEATURES ==========
+#=======================================================
+
+NumpyFeatures = np.vstack([SingleListContainingFeatures])
+print(np.shape(NumpyFeatures))
+
+#=========================END===========================
+#======= POPULATING NUMPY ARRAY WITH FEATURES ==========
+#=========================END===========================
+
+
+
+#%%
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
